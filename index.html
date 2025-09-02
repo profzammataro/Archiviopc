@@ -154,6 +154,31 @@
             position: sticky;
             top: 0;
             z-index: 10;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.2s;
+        }
+
+        th:hover {
+            background: linear-gradient(135deg, #e9ecef, #dee2e6);
+        }
+
+        th.sortable::after {
+            content: " ⇅";
+            color: #999;
+            font-size: 12px;
+        }
+
+        th.sort-asc::after {
+            content: " ↑";
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        th.sort-desc::after {
+            content: " ↓";
+            color: #667eea;
+            font-weight: bold;
         }
 
         tr:hover {
@@ -297,17 +322,17 @@
                 <table id="computersTable">
                     <thead>
                         <tr>
-                            <th>Tipologia</th>
-                            <th>Marca</th>
-                            <th>Modello</th>
-                            <th>Sistema Operativo</th>
-                            <th>Codice Inventario</th>
-                            <th>Inventariato</th>
-                            <th>Stato</th>
-                            <th>Posizione</th>
-                            <th>Assegnato a</th>
-                            <th>Licenza Office</th>
-                            <th>Note</th>
+                            <th class="sortable" data-column="tipologia">Tipologia</th>
+                            <th class="sortable" data-column="marca">Marca</th>
+                            <th class="sortable" data-column="modello">Modello</th>
+                            <th class="sortable" data-column="sistemaOperativo">Sistema Operativo</th>
+                            <th class="sortable" data-column="codiceInventario">Codice Inventario</th>
+                            <th class="sortable" data-column="inventariato">Inventariato</th>
+                            <th class="sortable" data-column="stato">Stato</th>
+                            <th class="sortable" data-column="posizione">Posizione</th>
+                            <th class="sortable" data-column="assegnatoA">Assegnato a</th>
+                            <th class="sortable" data-column="licenzaOffice">Licenza Office</th>
+                            <th class="sortable" data-column="note">Note</th>
                             <th>Azioni</th>
                         </tr>
                     </thead>
@@ -429,6 +454,7 @@
         // Array per memorizzare i computer
         let computers = [];
         let currentEditId = null;
+        let currentSort = { column: null, direction: 'asc' };
 
         // Funzioni di autenticazione
         function login() {
@@ -535,6 +561,55 @@
                 const row = createTableRow(computer);
                 tbody.appendChild(row);
             });
+            
+            updateSortIndicators();
+        }
+
+        function sortComputers(column) {
+            if (currentSort.column === column) {
+                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.column = column;
+                currentSort.direction = 'asc';
+            }
+
+            computers.sort((a, b) => {
+                let valueA = (a[column] || '').toString().toLowerCase();
+                let valueB = (b[column] || '').toString().toLowerCase();
+
+                // Ordinamento numerico per codici inventario
+                if (column === 'codiceInventario') {
+                    const numA = valueA.match(/\d+/);
+                    const numB = valueB.match(/\d+/);
+                    if (numA && numB) {
+                        valueA = parseInt(numA[0]);
+                        valueB = parseInt(numB[0]);
+                    }
+                }
+
+                let result = 0;
+                if (valueA < valueB) result = -1;
+                if (valueA > valueB) result = 1;
+
+                return currentSort.direction === 'desc' ? -result : result;
+            });
+
+            displayComputers();
+        }
+
+        function updateSortIndicators() {
+            // Rimuovi tutte le classi di ordinamento
+            document.querySelectorAll('th.sortable').forEach(th => {
+                th.classList.remove('sort-asc', 'sort-desc');
+            });
+
+            // Aggiungi la classe appropriata alla colonna corrente
+            if (currentSort.column) {
+                const th = document.querySelector(`th[data-column="${currentSort.column}"]`);
+                if (th) {
+                    th.classList.add(currentSort.direction === 'asc' ? 'sort-asc' : 'sort-desc');
+                }
+            }
         }
 
         function createTableRow(computer) {
@@ -690,6 +765,14 @@
                     } else {
                         row.style.display = 'none';
                     }
+                });
+            });
+
+            // Setup ordinamento colonne
+            document.querySelectorAll('th.sortable').forEach(th => {
+                th.addEventListener('click', function() {
+                    const column = this.getAttribute('data-column');
+                    sortComputers(column);
                 });
             });
         }
