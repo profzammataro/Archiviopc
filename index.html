@@ -306,6 +306,7 @@
                             <th>Stato</th>
                             <th>Posizione</th>
                             <th>Assegnato a</th>
+                            <th>Licenza Office</th>
                             <th>Note</th>
                             <th>Azioni</th>
                         </tr>
@@ -385,6 +386,10 @@
                     <div class="form-group">
                         <label for="assegnatoA">Assegnato a:</label>
                         <input type="text" id="assegnatoA" placeholder="Nome e cognome della persona">
+                    </div>
+                    <div class="form-group">
+                        <label for="licenzaOffice">Licenza Office:</label>
+                        <input type="text" id="licenzaOffice" placeholder="es. Office 2021, Microsoft 365, LibreOffice">
                     </div>
                     <div class="form-group">
                         <label for="note">Note:</label>
@@ -485,6 +490,7 @@
                     stato: 'Già assegnato',
                     posizione: 'Aula 3B',
                     assegnatoA: 'Prof. Mario Rossi',
+                    licenzaOffice: 'Microsoft 365',
                     note: 'In ottime condizioni, 16GB RAM'
                 },
                 'comp2': {
@@ -497,6 +503,7 @@
                     stato: 'Disponibile',
                     posizione: 'Laboratorio Informatica',
                     assegnatoA: '',
+                    licenzaOffice: 'Office 2021',
                     note: 'Necessita aggiornamento RAM'
                 },
                 'comp3': {
@@ -509,6 +516,7 @@
                     stato: 'Da riparare',
                     posizione: 'Magazzino',
                     assegnatoA: '',
+                    licenzaOffice: '',
                     note: 'Schermo danneggiato'
                 }
             };
@@ -544,6 +552,7 @@
                 <td>${statusBadge}</td>
                 <td>${computer.posizione}</td>
                 <td>${computer.assegnatoA}</td>
+                <td>${computer.licenzaOffice || '-'}</td>
                 <td>${computer.note}</td>
                 <td>
                     <button class="btn btn-warning" style="margin-right: 5px; font-size: 12px; padding: 8px 12px;" onclick="editComputer('${computer.id}')">✏️</button>
@@ -597,6 +606,7 @@
             document.getElementById('stato').value = computer.stato;
             document.getElementById('posizione').value = computer.posizione;
             document.getElementById('assegnatoA').value = computer.assegnatoA;
+            document.getElementById('licenzaOffice').value = computer.licenzaOffice || '';
             document.getElementById('note').value = computer.note;
         }
 
@@ -632,6 +642,7 @@
                 stato: document.getElementById('stato').value,
                 posizione: document.getElementById('posizione').value,
                 assegnatoA: document.getElementById('assegnatoA').value,
+                licenzaOffice: document.getElementById('licenzaOffice').value,
                 note: document.getElementById('note').value
             };
 
@@ -686,9 +697,9 @@
         // Funzione per esportare i dati
         function exportData() {
             const csvContent = "data:text/csv;charset=utf-8," 
-                + "Tipologia,Marca,Modello,Sistema Operativo,Codice Inventario,Inventariato,Stato,Posizione,Assegnato a,Note\n"
+                + "Tipologia,Marca,Modello,Sistema Operativo,Codice Inventario,Inventariato,Stato,Posizione,Assegnato a,Licenza Office,Note\n"
                 + computers.map(c => 
-                    `"${c.tipologia}","${c.marca || ''}","${c.modello || ''}","${c.sistemaOperativo}","${c.codiceInventario}","${c.inventariato}","${c.stato}","${c.posizione}","${c.assegnatoA}","${c.note}"`
+                    `"${c.tipologia}","${c.marca || ''}","${c.modello || ''}","${c.sistemaOperativo}","${c.codiceInventario}","${c.inventariato}","${c.stato}","${c.posizione}","${c.assegnatoA}","${c.licenzaOffice || ''}","${c.note}"`
                 ).join("\n");
 
             const encodedUri = encodeURI(csvContent);
